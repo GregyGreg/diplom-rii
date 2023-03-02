@@ -9,8 +9,6 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -46,13 +44,6 @@ class UserResource extends Resource
                         ->multiple()
                         ->preload(),
                 ]),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->label('Пароль')
-                    ->confirmed(),
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->password()
-                    ->label('Подтвердите пароль'),
             ]);
     }
 
@@ -60,6 +51,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make("id")->label('ID'),
                 Tables\Columns\TextColumn::make("last_name")->label('Фамилия'),
                 Tables\Columns\TextColumn::make("name")->label('Имя'),
                 Tables\Columns\TextColumn::make("surname")->label('Отчество'),

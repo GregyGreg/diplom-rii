@@ -27,11 +27,11 @@ class Application extends Model
 
     public function Authors(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     public function Executors(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'executor_id');
     }
 }

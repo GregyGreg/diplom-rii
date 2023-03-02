@@ -19,9 +19,10 @@ return new class extends Migration
             $table->text('text_application');
             $table->timestamp('create_application');
             $table->timestamp('close_application')->nullable();
-            $table->foreignId('executor_id');
-            $table->string('status');
+            $table->foreignId('executor_id')->nullable();
+            $table->string('status')->nullable();
             $table->text('cause_fall')->nullable();
+            $table->timestamps();
         });
     }
 
