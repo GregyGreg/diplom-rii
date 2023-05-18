@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('export_excel', [\App\Http\Controllers\ApplicationExport::class, 'exportToExcel'])->name('export_excel');
+Route::post('export_pdf', [\App\Http\Controllers\ApplicationExport::class, 'exportToPDF']);

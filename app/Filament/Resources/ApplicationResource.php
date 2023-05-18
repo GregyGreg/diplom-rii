@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -43,10 +44,14 @@ class ApplicationResource extends Resource
         $causeFallField = Forms\Components\Textarea::make('cause_fall')
             ->label('Причина невыполнения');
 
+        $closeApplication = Forms\Components\DateTimePicker::make('close_application')
+            ->label('Дата обработки заявки');
+
         if (!auth()->user()->hasRole('super_admin')) {
             $executorField->hiddenOn(['create', 'edit']);
             $statusField->hiddenOn(['create', 'edit']);
             $causeFallField->hiddenOn(['create', 'edit']);
+            $closeApplication->hiddenOn(['create', 'edit']);
         }
 
 
@@ -60,12 +65,17 @@ class ApplicationResource extends Resource
                         ->disabled(),
                     Forms\Components\Textarea::make('text_application')
                         ->label('Текст заявки'),
+                    Forms\Components\DateTimePicker::make('create_application')
+                        ->label('Дата создания заявки')
+                        ->default(Carbon::now())
+                        ->disabled(),
                 ]),
                 Forms\Components\Group::make()->schema([
                     $executorField,
                     $statusField,
                 ]),
                 $causeFallField,
+                $closeApplication,
             ]);
     }
 
@@ -73,7 +83,6 @@ class ApplicationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('author_id'),
                 Tables\Columns\TextColumn::make('id')
                     ->toggledHiddenByDefault(true),
                 Tables\Columns\TextColumn::make('authors.last_name')
@@ -88,10 +97,10 @@ class ApplicationResource extends Resource
                         'fall' => 'Не выполнено',
                     ])
                     ->label('Статус заявки'),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('create_application')
                     ->label('Дата создания заявки'),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Последние изменения'),
+                Tables\Columns\TextColumn::make('close_application')
+                    ->label('Дата обработки заявки'),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -113,11 +122,11 @@ class ApplicationResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('create_application', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('create_application', '<=', $date),
                             );
                     })
             ])

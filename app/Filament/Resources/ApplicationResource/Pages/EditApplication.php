@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ApplicationResource\Pages;
 use App\Filament\Resources\ApplicationResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 
 class EditApplication extends EditRecord
 {
@@ -19,8 +20,13 @@ class EditApplication extends EditRecord
 
     protected function getActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        if ($this->getRecord()->author_id == Auth::id() or auth()->user()->hasRole('super_admin')) {
+            return [
+                Actions\ViewAction::make(),
+                Actions\DeleteAction::make(),
+            ];
+        } else {
+            return [];
+        }
     }
 }

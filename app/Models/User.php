@@ -46,8 +46,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function applications(): HasMany
+    public function authorApplications(): HasMany
     {
-        return $this->hasMany(Application::class);
+        return $this->hasMany(Application::class, 'author_id');
+    }
+
+    public function executorApplications(): HasMany
+    {
+        return $this->hasMany(Application::class, 'executor_id');
     }
 }
