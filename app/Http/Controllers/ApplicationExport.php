@@ -7,37 +7,38 @@ use Illuminate\Http\Response;
 
 class ApplicationExport extends Controller
 {
-    public function exportToPDF ()
-    {
-
-    }
-
     public function exportToExcel (): Response
     {
-        $applications = Application::query()->with(['Authors', 'Executors'])->get();
-//        dd($applications);
+        $applications = Application::with(['Authors', 'Executors'])->get();
+        info($applications);
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'ID');
         $sheet->setCellValue('B1', 'ФИО заявителя');
         $sheet->setCellValue('C1', 'ФИО исполнителя');
         $sheet->setCellValue('D1', 'Почта заявителя');
-        $sheet->setCellValue('E1', 'Статус заявки');
-        $sheet->setCellValue('F1', 'Причина не выполнения заявки');
-        $sheet->setCellValue('G1', 'Дата создания заявки');
-        $sheet->setCellValue('H1', 'Дата обработки заявки');
+        $sheet->setCellValue('E1', 'Текст заявки');
+        $sheet->setCellValue('F1', 'Статус заявки');
+        $sheet->setCellValue('G1', 'Причина не выполнения заявки');
+        $sheet->setCellValue('H1', 'Дата создания заявки');
+        $sheet->setCellValue('I1', 'Дата обработки заявки');
 
         $row = 2;
         foreach ($applications as $application) {
             $sheet->setCellValue('A' . $row, $application->id);
-            $sheet->setCellValue('B' . $row, $application->authors->last_name . ' ' . $application->authors->name . ' ' . $application->authors->surname);
-            $sheet->setCellValue('C' . $row, $application->executors->last_name . ' ' . $application->executors->name . ' ' . $application->executors->surname or 'Исполнитель не выбран');
+            $sheet->setCellValue('B' . $row, $application->Authors->last_name . ' ' . $application->Authors->name . ' ' . $application->Authors->surname);
+            $sheet->setCellValue('C' . $row, $application->Executors ? $application->Executors->last_name . ' ' . $application->Executors->name . ' ' . $application->Executors->surname : 'Исполнитель не выбран');
             $sheet->setCellValue('D' . $row, $application->authors->email);
-            $sheet->setCellValue('E' . $row, $application->status);
-            $sheet->setCellValue('F' . $row, $application->cause_fall);
-            $sheet->setCellValue('F' . $row, $application->crete_application);
-            $sheet->setCellValue('F' . $row, $application->close_application);
+            $sheet->setCellValue('E' . $row, $application->text_application);
+            $sheet->setCellValue('F' . $row, $application->status);
+            $sheet->setCellValue('G' . $row, $application->cause_fall);
+            $sheet->setCellValue('H' . $row, $application->create_application);
+            $sheet->setCellValue('I' . $row, $application->close_application);
             $row++;
+        }
+
+        for ($col = 'A'; $col <= 'I'; $col++) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         // Сохранение файла Excel во временном местоположении

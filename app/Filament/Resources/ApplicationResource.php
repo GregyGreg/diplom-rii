@@ -102,6 +102,7 @@ class ApplicationResource extends Resource
                 Tables\Columns\TextColumn::make('close_application')
                     ->label('Дата обработки заявки'),
             ])
+            ->defaultSort('id', 'desc')
             ->filters([
                 SelectFilter::make('status')
                     ->label('Статус')
