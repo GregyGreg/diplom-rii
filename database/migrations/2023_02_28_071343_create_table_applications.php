@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamp('close_application')->nullable();
             $table->foreignId('executor_id')->nullable();
             $table->string('status')->nullable();
-            $table->text('cause_fall')->nullable();
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
 use Carbon\Carbon;
+use Filament\Columns\LinkColumn;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -14,6 +15,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationResource extends Resource
 {
@@ -27,10 +29,21 @@ class ApplicationResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        if (!auth()->user()->hasRole('super_admin')) {
+            $isDisabled = true;
+        } else {
+            $isDisabled = false;
+        }
+
         $executorField = Forms\Components\Select::make('executor_id')
             ->label('Исполнитель')
             ->searchable()
-            ->relationship('executors', 'last_name');
+            ->relationship('executors', 'formatted_name')
+            ->options(function () {
+                return \App\Models\User::all()->pluck('formatted_name', 'id');
+            })
+            ->disabled($isDisabled);
 
         $statusField = Forms\Components\Select::make('status')
             ->label('Статус заявки')
@@ -39,43 +52,55 @@ class ApplicationResource extends Resource
                 'done' => 'Выполнено',
                 'fall' => 'Не выполнено',
             ])
-            ->default('in_progress');
-
-        $causeFallField = Forms\Components\Textarea::make('cause_fall')
-            ->label('Причина невыполнения');
+            ->default('in_progress')
+            ->disabled($isDisabled);
 
         $closeApplication = Forms\Components\DateTimePicker::make('close_application')
-            ->label('Дата обработки заявки');
+            ->label('Дата обработки заявки')
+            ->displayFormat('d M Y H:i')
+            ->withoutSeconds()
+            ->disabled($isDisabled);
 
-        if (!auth()->user()->hasRole('super_admin')) {
-            $executorField->hiddenOn(['create', 'edit']);
-            $statusField->hiddenOn(['create', 'edit']);
-            $causeFallField->hiddenOn(['create', 'edit']);
-            $closeApplication->hiddenOn(['create', 'edit']);
-        }
-
+        $commentaryByExecutor = Forms\Components\Textarea::make('commentary')
+            ->label('Комментарий по заявке')
+            ->disabled($isDisabled)
+            ->rows(8);
 
         return $form
             ->schema([
                 Forms\Components\Grid::make()->schema([
-                    Forms\Components\Select::make('author_id')
-                        ->label('Заявитель')
-                        ->relationship('authors', 'last_name')
-                        ->default(Auth::id())
-                        ->disabled(),
+                    Forms\Components\Group::make()->schema([
+                        Forms\Components\Select::make('author_id')
+                            ->label('Заявитель')
+                            ->relationship('authors', 'formatted_name')
+                            ->options(function () {
+                                return \App\Models\User::all()->pluck('formatted_name', 'id');
+                            })
+                            ->default(Auth::id())
+                            ->disabled(),
+                        Forms\Components\DateTimePicker::make('create_application')
+                            ->label('Дата создания заявки')
+                            ->displayFormat('d M Y H:i')
+                            ->default(Carbon::now())
+                            ->disabled(),
+                        Forms\Components\Select::make('category_id')
+                            ->label('Категория заявки')
+                            ->relationship('categories', 'name')
+                            ->nullable(false),
+                    ]),
                     Forms\Components\Textarea::make('text_application')
-                        ->label('Текст заявки'),
-                    Forms\Components\DateTimePicker::make('create_application')
-                        ->label('Дата создания заявки')
-                        ->default(Carbon::now())
-                        ->disabled(),
+                        ->label('Текст заявки')
+                        ->nullable(false)
+                        ->rows(8),
+
                 ]),
                 Forms\Components\Group::make()->schema([
                     $executorField,
                     $statusField,
+                    $closeApplication,
                 ]),
-                $causeFallField,
-                $closeApplication,
+                $commentaryByExecutor,
+
             ]);
     }
 
@@ -85,11 +110,13 @@ class ApplicationResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->toggledHiddenByDefault(true),
-                Tables\Columns\TextColumn::make('authors.last_name')
+                Tables\Columns\TextColumn::make('authors.formatted_name')
                     ->label('Заявитель'),
-                Tables\Columns\TextColumn::make('executors.last_name')
+                Tables\Columns\TextColumn::make('executors.formatted_name')
                     ->default('Не выбран')
                     ->label('Исполнитель'),
+                Tables\Columns\TextColumn::make('categories.name')
+                    ->label('Категория заявки'),
                 Tables\Columns\TextColumn::make('status')
                     ->enum([
                         'in_progress' => 'В процессе',
@@ -100,7 +127,8 @@ class ApplicationResource extends Resource
                 Tables\Columns\TextColumn::make('create_application')
                     ->label('Дата создания заявки'),
                 Tables\Columns\TextColumn::make('close_application')
-                    ->label('Дата обработки заявки'),
+                    ->label('Дата обработки заявки')
+                    ->default('Нет информации'),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
@@ -129,7 +157,18 @@ class ApplicationResource extends Resource
                                 $data['created_until'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('create_application', '<=', $date),
                             );
+                    }),
+                SelectFilter::make('category')
+                    ->relationship('categories', 'name')
+                    ->label('Категория')
+                    ->searchable(),
+                SelectFilter::make('author')
+                    ->relationship('authors', 'formatted_name')
+                    ->label('Заявитель')
+                    ->options(function () {
+                        return \App\Models\User::all()->pluck('formatted_name', 'id');
                     })
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -142,13 +181,6 @@ class ApplicationResource extends Resource
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

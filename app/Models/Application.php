@@ -17,7 +17,8 @@ class Application extends Model
         'close_application',
         'executor_id',
         'status',
-        'cause_fall',
+        'category_id',
+        'commentary',
     ];
 
     protected $casts = [
@@ -25,13 +26,21 @@ class Application extends Model
         'close_application' => 'datetime',
     ];
 
+    // Отношение "многие к одному" с таблицей Users
     public function Authors(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    // Отношение "многие к одному" с таблицей Users
     public function Executors(): BelongsTo
     {
         return $this->belongsTo(User::class, 'executor_id', relation: 'executorApplications');
+    }
+
+    // Отношение "многие к одному" с таблицей Categories
+    public function Categories(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

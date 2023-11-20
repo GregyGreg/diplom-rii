@@ -17,11 +17,12 @@ class ApplicationExport extends Controller
         $sheet->setCellValue('B1', 'ФИО заявителя');
         $sheet->setCellValue('C1', 'ФИО исполнителя');
         $sheet->setCellValue('D1', 'Почта заявителя');
-        $sheet->setCellValue('E1', 'Текст заявки');
-        $sheet->setCellValue('F1', 'Статус заявки');
-        $sheet->setCellValue('G1', 'Причина не выполнения заявки');
-        $sheet->setCellValue('H1', 'Дата создания заявки');
-        $sheet->setCellValue('I1', 'Дата обработки заявки');
+        $sheet->setCellValue('E1', 'Категория заявки');
+        $sheet->setCellValue('F1', 'Текст заявки');
+        $sheet->setCellValue('G1', 'Статус заявки');
+        $sheet->setCellValue('H1', 'Причина не выполнения заявки');
+        $sheet->setCellValue('I1', 'Дата создания заявки');
+        $sheet->setCellValue('J1', 'Дата обработки заявки');
 
         $row = 2;
         foreach ($applications as $application) {
@@ -29,15 +30,16 @@ class ApplicationExport extends Controller
             $sheet->setCellValue('B' . $row, $application->Authors->last_name . ' ' . $application->Authors->name . ' ' . $application->Authors->surname);
             $sheet->setCellValue('C' . $row, $application->Executors ? $application->Executors->last_name . ' ' . $application->Executors->name . ' ' . $application->Executors->surname : 'Исполнитель не выбран');
             $sheet->setCellValue('D' . $row, $application->authors->email);
-            $sheet->setCellValue('E' . $row, $application->text_application);
-            $sheet->setCellValue('F' . $row, $application->status);
-            $sheet->setCellValue('G' . $row, $application->cause_fall);
-            $sheet->setCellValue('H' . $row, $application->create_application);
-            $sheet->setCellValue('I' . $row, $application->close_application);
+            $sheet->setCellValue('E' . $row, $application->Categories->name);
+            $sheet->setCellValue('F' . $row, $application->text_application);
+            $sheet->setCellValue('G' . $row, $application->status);
+            $sheet->setCellValue('H' . $row, $application->cause_fall);
+            $sheet->setCellValue('I' . $row, $application->create_application);
+            $sheet->setCellValue('J' . $row, $application->close_application);
             $row++;
         }
 
-        for ($col = 'A'; $col <= 'I'; $col++) {
+        for ($col = 'A'; $col <= 'J'; $col++) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

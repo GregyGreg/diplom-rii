@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'name' => 'string',
         'last_name',
         'surname',
         'email',
@@ -45,6 +45,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getFormattedNameAttribute(): string
+    {
+        $name = $this->name;
+        $surname = $this->surname;
+        $last_name = $this->last_name;
+
+        $initials = $last_name . ' ' . mb_substr($name, 0, 1, 'UTF-8') . '.' . mb_substr($surname, 0, 1, 'UTF-8') . '.';
+
+        return $initials;
+    }
 
     public function authorApplications(): HasMany
     {
