@@ -42,7 +42,7 @@ class CategoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->toggledHiddenByDefault(true),
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('title')
                     ->label('Название'),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Описание'),
