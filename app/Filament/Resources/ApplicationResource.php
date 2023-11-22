@@ -85,7 +85,7 @@ class ApplicationResource extends Resource
                             ->disabled(),
                         Forms\Components\Select::make('category_id')
                             ->label('Категория заявки')
-                            ->relationship('categories', 'name')
+                            ->relationship('categories', 'title')
                             ->nullable(false),
                     ]),
                     Forms\Components\Textarea::make('text_application')
@@ -115,7 +115,7 @@ class ApplicationResource extends Resource
                 Tables\Columns\TextColumn::make('executors.formatted_name')
                     ->default('Не выбран')
                     ->label('Исполнитель'),
-                Tables\Columns\TextColumn::make('categories.name')
+                Tables\Columns\TextColumn::make('categories.title')
                     ->label('Категория заявки'),
                 Tables\Columns\TextColumn::make('status')
                     ->enum([
@@ -159,7 +159,7 @@ class ApplicationResource extends Resource
                             );
                     }),
                 SelectFilter::make('category')
-                    ->relationship('categories', 'name')
+                    ->relationship('categories', 'title')
                     ->label('Категория')
                     ->searchable(),
                 SelectFilter::make('author')

@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
-use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CategoryResource extends Resource
 {
@@ -19,13 +16,17 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-folder';
 
+    protected static ?string $label = 'Категория';
+
+    protected static ?string $pluralLabel = 'Категории';
+
     protected static ?string $navigationGroup = 'admin';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('title')
                     ->label('Название')
                     ->required(),
                 Forms\Components\Textarea::make('description')
