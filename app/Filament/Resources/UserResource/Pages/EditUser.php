@@ -5,6 +5,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 
 class EditUser extends EditRecord
 {
@@ -12,13 +13,22 @@ class EditUser extends EditRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        if ($this->getRecord()->id == Auth::id()) {
+
+            return url(env('FILAMENT_PATH') . '/login');
+        } else {
+            return $this->getResource()::getUrl('index');
+        }
     }
 
     protected function getActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        if ($this->getRecord()->id == Auth::id() or auth()->user()->hasRole('super_admin')) {
+            return [
+                Actions\DeleteAction::make(),
+            ];
+        } else {
+            return [];
+        }
     }
 }

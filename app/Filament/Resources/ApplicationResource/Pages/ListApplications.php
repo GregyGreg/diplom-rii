@@ -16,7 +16,7 @@ class ListApplications extends ListRecords
             return [
                 Actions\Action::make('excel')
                     ->label('Excel')
-                    ->url(route('export_excel'))
+                    ->url(route('application_export_excel'))
                     ->icon('heroicon-o-download')
                     ->button(),
                 Actions\CreateAction::make(),

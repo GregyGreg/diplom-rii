@@ -9,6 +9,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -25,6 +26,11 @@ class UserResource extends Resource
 
     public static function form(Form $form): Form
     {
+        if (!auth()->user()->hasRole('super_admin')) {
+            $is_disabled = true;
+        } else {
+            $is_disabled = false;
+        }
         return $form
             ->schema([
                 Forms\Components\Grid::make(3)->schema([
@@ -43,11 +49,13 @@ class UserResource extends Resource
                         ->label('Права')
                         ->relationship('roles', 'name')
                         ->multiple()
+                        ->disabled($is_disabled)
                         ->preload(),
                     Forms\Components\TextInput::make('password')
                         ->password()
                         ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                         ->dehydrated(fn ($state) => filled($state))
+                        ->autocomplete('password')
                         ->label('Пароль'),
                 ]),
             ]);
@@ -55,6 +63,15 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
+        if (!auth()->user()->hasRole('super_admin')) {
+            $filters = Tables\Filters\SelectFilter::make('id')
+                ->default(Auth::id())
+                ->visible();
+        } else {
+            $filters = Tables\Filters\SelectFilter::make('id')
+                ->hidden();
+        }
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make("id")->label('ID'),
@@ -64,11 +81,13 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')->label('Почта'),
                 Tables\Columns\TextColumn::make('roles.name')->label('Роль'),
             ])
+            ->defaultSort('id')
             ->filters([
-                //
+                $filters,
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(!auth()->user()->hasRole('super_admin') ),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -81,6 +100,7 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'view' => Pages\ViewUser::route('/{record}/view'),
         ];
     }
 }

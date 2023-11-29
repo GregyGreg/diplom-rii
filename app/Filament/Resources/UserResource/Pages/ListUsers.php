@@ -12,9 +12,20 @@ class ListUsers extends ListRecords
 
     protected function getActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        if (auth()->user()->hasRole('super_admin')) {
+            return [
+                Actions\Action::make('excel')
+                    ->label('Excel')
+                    ->url(route('user_export_excel'))
+                    ->icon('heroicon-o-download')
+                    ->button(),
+                Actions\CreateAction::make(),
+            ];
+        } else {
+            return [
+                Actions\CreateAction::make()
+            ];
+        }
     }
 
     protected function getTableRecordsPerPageSelectOptions(): array

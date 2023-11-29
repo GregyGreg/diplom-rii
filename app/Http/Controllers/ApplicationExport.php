@@ -10,7 +10,6 @@ class ApplicationExport extends Controller
     public function exportToExcel (): Response
     {
         $applications = Application::with(['Authors', 'Executors'])->get();
-        info($applications);
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'ID');
@@ -30,7 +29,7 @@ class ApplicationExport extends Controller
             $sheet->setCellValue('B' . $row, $application->Authors->last_name . ' ' . $application->Authors->name . ' ' . $application->Authors->surname);
             $sheet->setCellValue('C' . $row, $application->Executors ? $application->Executors->last_name . ' ' . $application->Executors->name . ' ' . $application->Executors->surname : 'Исполнитель не выбран');
             $sheet->setCellValue('D' . $row, $application->authors->email);
-            $sheet->setCellValue('E' . $row, $application->Categories->name);
+            $sheet->setCellValue('E' . $row, $application->Categories->title);
             $sheet->setCellValue('F' . $row, $application->text_application);
             $sheet->setCellValue('G' . $row, $application->status);
             $sheet->setCellValue('H' . $row, $application->cause_fall);

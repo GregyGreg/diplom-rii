@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
 use Carbon\Carbon;
-use Filament\Columns\LinkColumn;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -15,7 +14,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ApplicationResource extends Resource
 {
@@ -32,8 +30,10 @@ class ApplicationResource extends Resource
 
         if (!auth()->user()->hasRole('super_admin')) {
             $isDisabled = true;
+            $dateNow = '';
         } else {
             $isDisabled = false;
+            $dateNow = Carbon::now();
         }
 
         $executorField = Forms\Components\Select::make('executor_id')
@@ -48,17 +48,19 @@ class ApplicationResource extends Resource
         $statusField = Forms\Components\Select::make('status')
             ->label('Статус заявки')
             ->options([
-                'in_progress' => 'В процессе',
+                'wait' => 'Заявка создана',
+                'in_progress' => 'В работе',
                 'done' => 'Выполнено',
                 'fall' => 'Не выполнено',
             ])
-            ->default('in_progress')
+            ->default('wait')
             ->disabled($isDisabled);
 
         $closeApplication = Forms\Components\DateTimePicker::make('close_application')
             ->label('Дата обработки заявки')
             ->displayFormat('d M Y H:i')
             ->withoutSeconds()
+            ->default($dateNow)
             ->disabled($isDisabled);
 
         $commentaryByExecutor = Forms\Components\Textarea::make('commentary')
@@ -119,7 +121,8 @@ class ApplicationResource extends Resource
                     ->label('Категория заявки'),
                 Tables\Columns\TextColumn::make('status')
                     ->enum([
-                        'in_progress' => 'В процессе',
+                        'wait' => 'Заявка создана',
+                        'in_progress' => 'В работе',
                         'done' => 'Выполнено',
                         'fall' => 'Не выполнено',
                     ])
@@ -136,7 +139,8 @@ class ApplicationResource extends Resource
                     ->label('Статус')
                     ->multiple()
                     ->options([
-                        'in_progress' => 'В процессе',
+                        'wait' => 'Заявка создана',
+                        'in_progress' => 'В работе',
                         'done' => 'Выполнено',
                         'fall' => 'Не выполнено',
                     ]),
@@ -189,7 +193,7 @@ class ApplicationResource extends Resource
             'index' => Pages\ListApplications::route('/'),
             'create' => Pages\CreateApplication::route('/create'),
             'edit' => Pages\EditApplication::route('/{record}/edit'),
-            'view' => Pages\ViewApplications::route('/{record}/view'),
+            'view' => UserResource\Pages\ViewUser::route('/{record}/view'),
         ];
     }
 }

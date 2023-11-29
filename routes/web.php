@@ -17,5 +17,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('export_excel', [\App\Http\Controllers\ApplicationExport::class, 'exportToExcel'])->name('export_excel');
-Route::post('export_pdf', [\App\Http\Controllers\ApplicationExport::class, 'exportToPDF']);
+Route::get('application_export_excel', [\App\Http\Controllers\ApplicationExport::class, 'exportToExcel'])->name('application_export_excel');
+Route::get('user_export_excel', [\App\Http\Controllers\UsersExport::class, 'exportToExcel'])->name('user_export_excel');
