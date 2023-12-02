@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Filament\Resources\UserResource\Pages;
+namespace App\Filament\Resources\ApplicationResource\Pages;
 
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\ApplicationResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 use function auth;
 
-class ViewUser extends ViewRecord
+class ViewApplications extends ViewRecord
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = ApplicationResource::class;
 
     protected static ?string $title = 'Просмотр заявки';
 
     protected function getActions(): array
     {
-        if ($this->getRecord()->id == Auth::id() or auth()->user()->hasRole('super_admin')) {
+        if (($this->getRecord()->author_id == Auth::id() and $this->getRecord()->status == 'wait') or auth()->user()->hasRole('super_admin')) {
             return [
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
